@@ -68,7 +68,9 @@ object RunBenchmark {
   def run(config: RunConfig): Unit = {
     val conf = new SparkConf()
       .setMaster(config.master)
-      .setAppName(getClass.getName)
+      //.setAppName(getClass.getName)
+      .setAppName(config.benchmarkName)
+      .set("spark.eventLog.enabled", "true")
 
     val sparkSession = SparkSession.builder.config(conf).getOrCreate()
     val sc = sparkSession.sparkContext
