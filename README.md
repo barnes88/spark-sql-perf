@@ -37,6 +37,17 @@ The first run of `bin/run` will build the library.
 Use `sbt package` or `sbt assembly` to build the library jar.  
 Use `sbt +package` to build for scala 2.11 and 2.12.
 
+# Benchmark QuickStart
+From root of this directory clone tpcdsgen:
+`git clone https://github.com/barnes88/tpcds-kit.git`
+
+Build package:
+`sbt package `
+
+Setup and run benchmarks or microbenchmarks:
+`sbt run`
+then enter the corresponding number of the benchmark you'd like to run
+
 ## Local performance tests
 The framework contains twelve benchmarks that can be executed in local mode. They are organized into three classes and target different components and functions of Spark:
 * [DatasetPerformance](https://github.com/databricks/spark-sql-perf/blob/master/src/main/scala/com/databricks/spark/sql/perf/DatasetPerformance.scala) compares the performance of the old RDD API with the new Dataframe and Dataset APIs.
