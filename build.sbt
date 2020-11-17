@@ -22,6 +22,7 @@ sparkComponents ++= Seq("sql", "hive", "mllib")
 initialCommands in console :=
   """
     |import org.apache.spark.sql._
+    |import org.apache.spark.SparkConf
     |import org.apache.spark.sql.functions._
     |import org.apache.spark.sql.types._
     |import org.apache.spark.sql.hive.test.TestHive
@@ -39,6 +40,9 @@ libraryDependencies += "com.twitter" %% "util-jvm" % "6.45.0" % "provided"
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % "test"
 
 libraryDependencies += "org.yaml" % "snakeyaml" % "1.23"
+
+// Include "provided" dependencies in runtime classpath (jar is not bundled with spark-core but it is needed to run)
+run in Compile := Defaults.runTask(fullClasspath in Compile, mainClass in (Compile, run), runner in (Compile, run)).evaluated
 
 fork := true
 
