@@ -13,6 +13,7 @@ object TpchRun {
   def main(args: Array[String]) {
     /* Run Parameters */
     val threadsPerExecutor = 20
+    val rootDir = Paths.get("TPCH_data").toAbsolutePath().toString()
     val resultLocation = Paths.get("TPCH_results").toAbsolutePath().toString()
     val scaleFactor = 1 // Size of dataset to generate in GB
     val format = "parquet"
@@ -36,7 +37,26 @@ object TpchRun {
     val sqlContext = spark.sqlContext
 
     /* Setup Dataset for tpch */
-    val tpch = new TPCH(sqlContext = spark.sqlContext)
+   val tables = new TPCHTables(
+     sqlContext = sqlContext,
+     dbgenDir = "tpch-dbgen",
+     scaleFactor = scaleFactor.toString,
+     useDoubleForDecimal = false,
+     useStringForDate = false,
+     generatorParams = Nil)
+
+   tables.genData(
+      location = rootDir,
+      format = format,
+      overwrite = true, // overwrite the data that is already there
+      partitionTables = true, // create the partitioned fact tables 
+      clusterByPartitionColumns = true, // shuffle to get partitions coalesced into single files. 
+      filterOutNullPartitionValues = false, // true to filter out the partition with NULL key value
+      tableFilter = "", // "" means generate all tables
+      numPartitions = 100 // how many dsdgen partitions to run - number of input tasks.
+    )
+
+   val tpch = new TPCH(sqlContext = spark.sqlContext)
 
     val queries = (1 to 22).map { q =>
       val queryContent: String = IOUtils.toString(
@@ -47,6 +67,9 @@ object TpchRun {
 
     /* Run benchmarking queries */
     spark.sql(s"create database ${databaseName(scaleFactor, format)}")
+    tables.createExternalTables(rootDir, "parquet", databaseName(scaleFactor, format), overwrite = true, discoverPartitions = true)
+    tables.analyzeTables(databaseName(scaleFactor, format), analyzeColumns = true)
+
     spark.sql(s"USE ${databaseName(scaleFactor, format)}")
     val experiment = tpch.runExperiment(
       queries,
