@@ -37,14 +37,18 @@ The first run of `bin/run` will build the library.
 Use `sbt package` or `sbt assembly` to build the library jar.  
 Use `sbt +package` to build for scala 2.11 and 2.12.
 
-# Benchmark QuickStart
-From root of this directory clone tpcdsgen:
-`git clone https://github.com/barnes88/tpcds-kit.git`
+# TPCH / TPCDS Benchmark QuickStart
+Run the following commands to prepare the benchmark inputs :
+```
+git clone https://github.com/barnes88/tpcds-kit.git
+git clone https://github.com/databricks/tpch-dbgen.git
+make -C ./tpcds-kit/tools OS=LINUX
+make -C ./tpch-dbgen
 
-Build package:
-`sbt package `
+sbt package 
+```
 
-Setup and run benchmarks or microbenchmarks:
+To compile and run the benchmarks:
 `sbt run`
 then enter the corresponding number of the benchmark you'd like to run
 
