@@ -41,15 +41,16 @@ Use `sbt +package` to build for scala 2.11 and 2.12.
 Run the following commands to prepare the benchmark inputs :
 ```
 git clone https://github.com/barnes88/tpcds-kit.git
-git clone https://github.com/databricks/tpch-dbgen.git
+git clone https://github.com/barnes88/tpch-dbgen.git
 make -C ./tpcds-kit/tools OS=LINUX
 make -C ./tpch-dbgen
-
-sbt package 
 ```
 
 To compile and run the benchmarks:
-`sbt run`
+```
+sbt package
+sbt run
+```
 then enter the corresponding number of the benchmark you'd like to run
 
 ## Local performance tests
