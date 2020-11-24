@@ -12,7 +12,7 @@ import com.databricks.spark.sql.perf.ExecutionMode.CollectResults
 object TpchRun {
   def main(args: Array[String]) {
     /* Run Parameters */
-    val threadsPerExecutor = 20
+    val threadsPerExecutor = 40
     val rootDir = Paths.get("TPCH_data").toAbsolutePath().toString()
     val resultLocation = Paths.get("TPCH_results").toAbsolutePath().toString()
     val scaleFactor = 1 // Size of dataset to generate in GB
@@ -21,7 +21,7 @@ object TpchRun {
     val timeout = 36*60*60 // timeout in seconds
     def databaseName(scaleFactor: Int, format: String) = s"tpch_sf${scaleFactor}_${format}"
     def randomizeQueries = false
-    val workers = 10
+    val workers = 1
     val runtype = "TPCH run"
     val configuration = "default"
 
@@ -29,10 +29,14 @@ object TpchRun {
     val conf = new SparkConf()
       .setAppName("TpchRun")
       .setMaster(s"local[$threadsPerExecutor]")
+      .set("spark.local.dir", Paths.get("SPARK_LOCAL").toAbsolutePath.toString)
       .set("spark.driver.memory", "16g")
       .set("spark.executor.memory", "16g")
       .set("spark.eventLog.enabled", "true")
+      .set("spark.eventLog.dir", Paths.get("SPARK_LOGS").toAbsolutePath.toString)
       .set("spark.sql.broadcastTimeout", "7200")
+      .set("parquet.memory.pool.ratio", "0.5")
+      .set("spark.sql.shuffle.partitions", "200")
     val spark = SparkSession.builder.config(conf).getOrCreate()
     val sqlContext = spark.sqlContext
 
@@ -70,6 +74,7 @@ object TpchRun {
     tables.createExternalTables(rootDir, "parquet", databaseName(scaleFactor, format), overwrite = true, discoverPartitions = true)
     tables.analyzeTables(databaseName(scaleFactor, format), analyzeColumns = true)
 
+    println("DBGEN COMPLETE... RUNNING EXPERIMENT")
     spark.sql(s"USE ${databaseName(scaleFactor, format)}")
     val experiment = tpch.runExperiment(
       queries,
