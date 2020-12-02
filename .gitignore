@@ -19,3 +19,8 @@ src_managed/
 project/boot/
 project/plugins/project/
 performance/
+
+#TPC benchmarks
+TPCH/
+TPCDS/
+tpcds-kit/

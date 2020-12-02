@@ -9,9 +9,10 @@ import com.databricks.spark.sql.perf.tpcds.TPCDS
 object Gpu_TpcdsRun {
   def main(args: Array[String]) {
     /* Run Parameters */
-    val threadsPerExecutor = 20 
-    val rootDir = Paths.get("TPCDS_data").toAbsolutePath().toString()
-    val resultLocation = Paths.get("Gpu_TPCDS_results").toAbsolutePath().toString()
+    val cores: Int = Runtime.getRuntime.availableProcessors.toInt //number of CPU-cores
+    println("\nNUMBER OF CORES SET TO " + cores)
+    val rootDir = Paths.get("TPCDS").toAbsolutePath().toString()
+    val resultLocation = s"$rootDir/gpuResults" 
     val databaseName = "tpcds"
     val scaleFactor = "1" // Size of dataset to generate in GB
     val format = "parquet"
@@ -21,7 +22,7 @@ object Gpu_TpcdsRun {
     /* Setup Spark Context and Config */
     val conf = new SparkConf()
       .setAppName("Gpu_TpcdsRun")
-      .setMaster(s"local[$threadsPerExecutor]")
+      .setMaster(s"local[$cores]")
       .set("spark.driver.memory", "16g")
       .set("spark.executor.memory", "16g")
       .set("spark.eventLog.enabled", "true")
