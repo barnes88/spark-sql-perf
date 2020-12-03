@@ -1,10 +1,22 @@
 # Spark SQL Performance Tests
 
-[![Build Status](https://travis-ci.org/databricks/spark-sql-perf.svg)](https://travis-ci.org/databricks/spark-sql-perf)
-
 This is a performance testing framework for [Spark SQL](https://spark.apache.org/sql/) in [Apache Spark](https://spark.apache.org/) 2.2+.
 
 **Note: This README is still under development. Please also check our source code for more information.**
+
+# TPCH / TPCDS Benchmark QuickStart
+Run the following commands to prepare the benchmark inputs :
+```
+git clone https://github.com/barnes88/tpcds-kit.git
+make -C ./tpcds-kit/tools OS=LINUX
+```
+
+To compile and run the benchmarks:
+```
+sbt package
+sbt "run [benchmark name]"
+```
+where `[benchmark name]` can be one of the following: `Tpcds, Gpu_Tpcds, Tpch, Gpu_Tpch`
 
 # Quick Start
 
@@ -37,21 +49,6 @@ The first run of `bin/run` will build the library.
 Use `sbt package` or `sbt assembly` to build the library jar.  
 Use `sbt +package` to build for scala 2.11 and 2.12.
 
-# TPCH / TPCDS Benchmark QuickStart
-Run the following commands to prepare the benchmark inputs :
-```
-git clone https://github.com/barnes88/tpcds-kit.git
-git clone https://github.com/barnes88/tpch-dbgen.git
-make -C ./tpcds-kit/tools OS=LINUX
-make -C ./tpch-dbgen
-```
-
-To compile and run the benchmarks:
-```
-sbt package
-sbt run
-```
-then enter the corresponding number of the benchmark you'd like to run
 
 ## Local performance tests
 The framework contains twelve benchmarks that can be executed in local mode. They are organized into three classes and target different components and functions of Spark:
