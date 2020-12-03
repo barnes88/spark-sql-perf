@@ -1,4 +1,4 @@
-object TpchRun {
+object Gpu_TpchRun {
   def main(args: Array[String]) {
 // Multi TPC- H and DS generator and database importer using spark-sql-perf, typically to generate parquet files in S3/blobstore objects
 
@@ -70,7 +70,7 @@ object TpchRun {
   // COMMAND ----------
   /* Setup Spark Context and Config */
       val conf = new SparkConf()
-        .setAppName(s"TphchRun_sf${scaleFactors.head}")
+        .setAppName(s"Gpu_TphchRun_sf${scaleFactors.head}")
         .setMaster(s"local[$cores]")
         .set("spark.driver.memory", "16g")
         .set("spark.executor.memory", "16g")
@@ -81,6 +81,18 @@ object TpchRun {
         .set("spark.eventLog.enabled", "true")
         .set("spark.eventLog.dir", Paths.get("SPARK_LOGS").toAbsolutePath.toString)
         .set("spark.local.dir", s"$rootDir/SPARK_LOCAL")
+        // Adding RAPIDS GPU confs
+        .set("spark.sql.rapids.sql.enabled", "true")
+        .set("spark.rapids.sql.incompatibleOps.enabled", "true")
+        .set("spark.executor.instances", "1") // changed to 1 executor
+        .set("spark.executor.cores", "1")
+        .set("spark.rapids.sql.concurrentGpuTasks", "1")
+        .set("spark.rapids.memory.pinnedPool.size", "2G")
+        .set("spark.locality.wait", "0s")
+        .set("spark.sql.files.maxPartitionBytes", "512m")
+        .set("spark.sql.shuffle.partitions", "10")
+        .set("spark.plugins", "com.nvidia.spark.SQLPlugin")
+
       val spark = SparkSession.builder.config(conf).getOrCreate()
       val sqlContext = spark.sqlContext
       val sc = spark.sparkContext

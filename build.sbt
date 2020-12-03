@@ -48,11 +48,17 @@ libraryDependencies += "ai.rapids" % "cudf" % "0.15"
 // Include "provided" dependencies in runtime classpath (jar is not bundled with spark-core but it is needed to run)
 run in Compile := Defaults.runTask(fullClasspath in Compile, mainClass in (Compile, run), runner in (Compile, run)).evaluated
 
-fork := true
+// Specify a specific benchmark to run when `sbt run` is called
+// Valid options include one of the following: [TpchRun, Gpu_TpchRun, TpcdsRun, Gpu_TpcdsRun]
+// note: make sure to profile child processes and uncomment this line when profiling on GPU
+//mainClass in (Compile, run) := Some("Gpu_TpchRun")
+
+
 
 // Your username to login to Databricks Cloud
 dbcUsername := sys.env.getOrElse("DBC_USERNAME", "")
 
+fork := true
 // Your password (Can be set as an environment variable)
 dbcPassword := sys.env.getOrElse("DBC_PASSWORD", "")
 
