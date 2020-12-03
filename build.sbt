@@ -49,11 +49,11 @@ libraryDependencies += "ai.rapids" % "cudf" % "0.15"
 run in Compile := Defaults.runTask(fullClasspath in Compile, mainClass in (Compile, run), runner in (Compile, run)).evaluated
 
 // Specify a specific benchmark to run when `sbt run` is called
-// Valid options include one of the following: [TpchRun, Gpu_TpchRun, TpcdsRun, Gpu_TpcdsRun]
-// note: make sure to profile child processes and uncomment this line when profiling on GPU
-//mainClass in (Compile, run) := Some("Gpu_TpchRun")
+// note: make sure to profile child processes when profiling on GPU
+mainClass in (Compile, run) := Some("runnable.RunTpcBenchmarks")
 
-
+// Specify entry point for packaged jar
+//mainClass in (Compile, packageBin) := Some("runnable.RunTpcBenchmarks")
 
 // Your username to login to Databricks Cloud
 dbcUsername := sys.env.getOrElse("DBC_USERNAME", "")

@@ -1,3 +1,5 @@
+package runnable
+
 import java.nio.file.Path
 import java.nio.file.Paths
 
@@ -7,7 +9,7 @@ import com.databricks.spark.sql.perf.tpcds.TPCDSTables
 import com.databricks.spark.sql.perf.tpcds.TPCDS
 
 object TpcdsRun {
-  def main(args: Array[String]) {
+  def execute() {
     /* Run Parameters */
     val cores: Int = Runtime.getRuntime.availableProcessors.toInt //number of CPU-cores
     println("\nNUMBER OF CORES SET TO " + cores)

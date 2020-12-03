@@ -1,5 +1,7 @@
+package runnable
+
 object TpchRun {
-  def main(args: Array[String]) {
+  def execute() {
 // Multi TPC- H and DS generator and database importer using spark-sql-perf, typically to generate parquet files in S3/blobstore objects
 
   // Imports, fail fast if we are missing any library

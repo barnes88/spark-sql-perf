@@ -1,5 +1,7 @@
+package runnable
+
 object Gpu_TpchRun {
-  def main(args: Array[String]) {
+  def execute() {
 // Multi TPC- H and DS generator and database importer using spark-sql-perf, typically to generate parquet files in S3/blobstore objects
 
   // Imports, fail fast if we are missing any library
@@ -367,7 +369,7 @@ object Gpu_TpchRun {
     time {
       experiment.waitForFinish(36 * 60 * 60) //36hours
     }
-    println("TPCH Benchmark Complete")
+    println("GPU TPCH Benchmark Complete")
     // val summary = experiment.getCurrentResults
     // .withColumn("Name", substring(col("name"), 2, 100))
     // .withColumn("Runtime", (col("parsingTime") + col("analysisTime") + col("optimizationTime") + col("planningTime") + col("executionTime")) / 1000.0)
