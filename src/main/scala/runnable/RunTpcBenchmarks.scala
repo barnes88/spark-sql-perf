@@ -9,9 +9,8 @@ object RunTpcBenchmarks {
     }
 
     val benchmark : String = args(0)
-
     val startTime = System.currentTimeMillis() 
-    benchmark match {
+    val queryTimeSeconds = benchmark match {
       case "Tpch" =>
         println("Running Tpch Benchmark")
         TpchRun.execute()
@@ -27,11 +26,14 @@ object RunTpcBenchmarks {
       case _ =>
         println("Error, benchmark name not recognized")
         println("Valid options include one of: [Tpch, Gpu_Tpch, Tpcds, GpuTpcds]")
+        0
     }
 
     val endTime = System.currentTimeMillis()
+    val wallTimeSeconds = (endTime - startTime)/1000
 
-    println("Benchmark " + benchmark + "complete!")
-    println("Wallclock time elapsed: " + (endTime - startTime)/60000 + " minutes" )
+    println("Benchmark " + benchmark + " complete!")
+    println("Wallclock time elapsed: " + wallTimeSeconds/60 + " minutes " + wallTimeSeconds %60 + " seconds")
+    println("Time Spent executing Bencmark queries: " + queryTimeSeconds/60 + " minutes " + queryTimeSeconds%60 + " seconds" )
   }
 }

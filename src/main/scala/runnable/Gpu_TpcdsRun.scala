@@ -9,7 +9,7 @@ import com.databricks.spark.sql.perf.tpcds.TPCDSTables
 import com.databricks.spark.sql.perf.tpcds.TPCDS
 
 object Gpu_TpcdsRun {
-  def execute() {
+  def execute(): Long = {
     /* Run Parameters */
     val cores: Int = Runtime.getRuntime.availableProcessors.toInt //number of CPU-cores
     println("\nNUMBER OF CORES SET TO " + cores)
@@ -71,6 +71,7 @@ object Gpu_TpcdsRun {
     val queries = tpcds.tpcds2_4Queries
     spark.sql(s"use $databaseName")
 
+    val queryStartTime = System.currentTimeMillis()
     val experiment = tpcds.runExperiment(
       queries, 
       iterations = iterations,
@@ -78,6 +79,10 @@ object Gpu_TpcdsRun {
       forkThread = true)
 
     experiment.waitForFinish(timeout)
+
+    val queryEndTime = System.currentTimeMillis()
+    val queryTimeSeconds = (queryEndTime - queryStartTime) / 1000
+    return queryTimeSeconds
 
     //experiment.getCurrentResults // or: spark.read.json(resultLocation).filter("timestamp = 1429132621024")
       //.withColumn("Name", substring(col("name"), 2, 100))
