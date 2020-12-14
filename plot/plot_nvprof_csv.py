@@ -25,6 +25,7 @@ kernelCount = cycles.size
 print "Number of Kernels: " + str(kernelCount)
 
 #pd.options.plotting.backend = "plotly"
-fig = px.line(cycles)
+fig = px.scatter(cycles, title=filename)
+fig.update_layout(xaxis_title="Kernel Index")
 fig.show()
 
