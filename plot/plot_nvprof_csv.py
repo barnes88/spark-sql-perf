@@ -13,6 +13,9 @@ parser.add_argument('-f', '--filename',
                     action="store", dest="filename",
                     help='filename of csv file', default=None,
                     required=True)
+parser.add_argument('-s', '--saveFigure',
+                    action="store_true", dest='saveFigure',
+                    help="Write plot to disk as html file", default=False)
 args = parser.parse_args()
 filename = args.filename
 print "Parsing csv file: " + filename
@@ -27,5 +30,7 @@ print "Number of Kernels: " + str(kernelCount)
 #pd.options.plotting.backend = "plotly"
 fig = px.scatter(cycles, title=filename)
 fig.update_layout(xaxis_title="Kernel Index")
+if (args.saveFigure):
+    fig.write_html(filename+"_Figure.html")
 fig.show()
 
