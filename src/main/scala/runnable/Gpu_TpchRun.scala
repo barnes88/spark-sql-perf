@@ -6,6 +6,8 @@ object Gpu_TpchRun {
 
     // Imports, fail fast if we are missing any library
 
+    import jcuda.runtime.JCuda
+
     import java.nio.file.Path
     import java.nio.file.Paths
 
@@ -369,9 +371,11 @@ object Gpu_TpchRun {
          )
         )
         println(s"Running SF $scaleFactor")
+        JCuda.cudaProfilerStart()
         queryStartTime = System.currentTimeMillis()
         experiment.waitForFinish(36 * 60 * 60) //36hours
         queryEndTime = System.currentTimeMillis()
+        JCuda.cudaProfilerStop()
         println("GPU TPCH Benchmark Complete")
         // val summary = experiment.getCurrentResults
         // .withColumn("Name", substring(col("name"), 2, 100))

@@ -24,3 +24,11 @@ performance/
 TPCH/
 TPCDS/
 tpcds-kit/
+
+# Results
+*.csv
+*.csv#
+*.html
+*.txt
+Run_Gpu_Tpcds
+Run_Gpu_Tpch

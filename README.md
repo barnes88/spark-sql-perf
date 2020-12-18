@@ -13,11 +13,15 @@ make -C ./tpcds-kit/tools OS=LINUX
 
 To compile and run the benchmarks:
 ```
-sbt package
+sbt package -Djcuda.os=linux -Djcuda.arch=x86_64
 sbt "run [benchmark name]"
 ```
 where `[benchmark name]` can be one of the following: `Tpcds, Gpu_Tpcds, Tpch, Gpu_Tpch`
 
+GPU Profiling settings:
+```
+nvprof --profile-from-start off --profile-child-processes
+```
 # Quick Start
 
 ## Running from command line.

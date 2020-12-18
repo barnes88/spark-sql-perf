@@ -45,6 +45,8 @@ libraryDependencies += "com.nvidia" %% "rapids-4-spark" % "0.2.0"
 
 libraryDependencies += "ai.rapids" % "cudf" % "0.15"
 
+libraryDependencies += "org.jcuda" % "jcuda" % "10.1.0"
+
 // Include "provided" dependencies in runtime classpath (jar is not bundled with spark-core but it is needed to run)
 run in Compile := Defaults.runTask(fullClasspath in Compile, mainClass in (Compile, run), runner in (Compile, run)).evaluated
 

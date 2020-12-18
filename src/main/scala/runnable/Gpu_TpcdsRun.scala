@@ -8,6 +8,8 @@ import org.apache.spark.SparkConf
 import com.databricks.spark.sql.perf.tpcds.TPCDSTables
 import com.databricks.spark.sql.perf.tpcds.TPCDS
 
+import jcuda.runtime.JCuda
+
 object Gpu_TpcdsRun {
   def execute(): Long = {
     /* Run Parameters */
@@ -71,7 +73,9 @@ object Gpu_TpcdsRun {
     val queries = tpcds.tpcds2_4Queries
     spark.sql(s"use $databaseName")
 
+    println("\n*\n*\nDATABASE INITIALIZED, STARTING QUERIES\n*\n*\n")
     val queryStartTime = System.currentTimeMillis()
+    JCuda.cudaProfilerStart()
     val experiment = tpcds.runExperiment(
       queries, 
       iterations = iterations,
@@ -79,6 +83,7 @@ object Gpu_TpcdsRun {
       forkThread = true)
 
     experiment.waitForFinish(timeout)
+    JCuda.cudaProfilerStop()
 
     val queryEndTime = System.currentTimeMillis()
     val queryTimeSeconds = (queryEndTime - queryStartTime) / 1000
