@@ -164,10 +164,10 @@ class TPCHTables(
   ).map(_.convertTypes())
 }
 
-class TPCH(@transient sqlContext: SQLContext)
+class TPCH(@transient sqlContext: SQLContext, queryRange: Range = 1 to 22)
   extends Benchmark(sqlContext) {
 
-  val queries = (1 to 22).map { q =>
+  val queries = (queryRange).map { q =>
     val queryContent: String = IOUtils.toString(
       getClass().getClassLoader().getResourceAsStream(s"tpch/queries/$q.sql"))
     Query(s"Q$q", queryContent, description = "TPCH Query",

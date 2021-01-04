@@ -1,7 +1,7 @@
 package runnable
 
 object Gpu_TpchRun {
-  def execute(): Long = {
+  def execute(firstQuery: Int = 1, lastQuery: Int = 22): Long = {
     // Multi TPC- H and DS generator and database importer using spark-sql-perf, typically to generate parquet files in S3/blobstore objects
 
     // Imports, fail fast if we are missing any library
@@ -339,14 +339,17 @@ object Gpu_TpchRun {
     // TPCH runner (from spark-sql-perf) to be used on existing tables
     // edit the main configuration below
 
-    val queries = (1 to 22).map { q =>
+    // Run a subset of queries, by default run all queries: 1 to 22
+    val queryRange = firstQuery to lastQuery
+
+    val queries = (queryRange).map { q =>
       val queryContent: String = IOUtils.toString(
          org.apache.spark.sql.functions.getClass().getClassLoader().getResourceAsStream(s"tpch/queries/$q.sql"))
       new Query(s"Q$q", spark.sqlContext.sql(queryContent), description = s"TPCH Query $q",
         executionMode = CollectResults)
     }
 
-    val tpch = new TPCH(sqlContext = spark.sqlContext)
+    val tpch = new TPCH(sqlContext = spark.sqlContext, queryRange = queryRange)
 
     var queryStartTime : Long = 0
     var queryEndTime : Long = 0
