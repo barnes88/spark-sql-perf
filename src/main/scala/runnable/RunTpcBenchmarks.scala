@@ -8,11 +8,11 @@ object RunTpcBenchmarks {
       return
     }
 
-    val benchmark: String = args(0)
+    val benchmarkName: String = args(0)
     var subQuery: Boolean = false
     var firstQuery: Int = 0
     var lastQuery: Int = 0
-    if ((benchmark == "Tpch" || benchmark == "Gpu_Tpch") && args.length == 3) {
+    if ( args.length == 3) {
       println("Running a subset of Queries: " + args(1) + " to " + args(2))
       subQuery = true
       firstQuery = args(1).toInt
@@ -20,35 +20,35 @@ object RunTpcBenchmarks {
     }
 
     val startTime = System.currentTimeMillis() 
-    val queryTimeSeconds = benchmark match {
+    val benchmark: Runnable  = benchmarkName match {
       case "Tpch" =>
         println("Running Tpch Benchmark")
-        if (subQuery)
-          TpchRun.execute(firstQuery, lastQuery)
-        else
-          TpchRun.execute()
+        new TpchRun
       case "Gpu_Tpch" =>
         println("Running Gpu_Tpch Benchmark")
-        if (subQuery)
-          Gpu_TpchRun.execute(firstQuery, lastQuery)
-        else
-          Gpu_TpchRun.execute()
+        new Gpu_TpchRun
       case "Tpcds" =>
         println("Running Tpcds Benchmark")
-        TpcdsRun.execute()
+        new TpcdsRun
       case "Gpu_Tpcds" =>
         println("Running Gpu_Tpcds Benchmark")
-        Gpu_TpcdsRun.execute()
+        new Gpu_TpcdsRun
       case _ =>
         println("Error, benchmark name not recognized")
         println("Valid options include one of: [Tpch, Gpu_Tpch, Tpcds, GpuTpcds]")
-        0
+        null
     }
+
+    val queryTimeSeconds = 
+      if (subQuery)
+        benchmark.execute(firstQuery, lastQuery)
+      else
+        benchmark.execute()
 
     val endTime = System.currentTimeMillis()
     val wallTimeSeconds = (endTime - startTime)/1000
 
-    println("Benchmark " + benchmark + " complete!")
+    println("Benchmark " + benchmarkName + " complete!")
     println("Wallclock time elapsed: " + wallTimeSeconds/60 + " minutes " + wallTimeSeconds %60 + " seconds")
     println("Time Spent executing Bencmark queries: " + queryTimeSeconds/60 + " minutes " + queryTimeSeconds%60 + " seconds" )
     if (subQuery)

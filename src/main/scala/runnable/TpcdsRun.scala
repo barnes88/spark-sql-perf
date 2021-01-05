@@ -8,8 +8,8 @@ import org.apache.spark.SparkConf
 import com.databricks.spark.sql.perf.tpcds.TPCDSTables
 import com.databricks.spark.sql.perf.tpcds.TPCDS
 
-object TpcdsRun {
-  def execute(): Long = {
+class TpcdsRun extends Runnable {
+  override def execute(firstQuery: Int = 1, lastQuery: Int = 104): Long = {
     /* Run Parameters */
     val cores: Int = Runtime.getRuntime.availableProcessors.toInt //number of CPU-cores
     println("\nNUMBER OF CORES SET TO " + cores)
@@ -23,7 +23,7 @@ object TpcdsRun {
 
     /* Setup Spark Context and Config */
     val conf = new SparkConf()
-      .setAppName(s"TpcdsRun_sf$scaleFactor")
+      .setAppName(s"TpcdsRun_q${firstQuery}-${lastQuery}_sf$scaleFactor")
       .setMaster(s"local[$cores]")
       .set("spark.driver.memory", "16g")
       .set("spark.executor.memory", "16g")
@@ -58,11 +58,12 @@ object TpcdsRun {
     /* Run benchmarking queries */
     val tpcds = new TPCDS(sqlContext = sqlContext)
     val queries = tpcds.tpcds2_4Queries
+    val queriesSubset = queries.slice(firstQuery-1, lastQuery)
     spark.sql(s"use $databaseName")
 
     val queryStartTime = System.currentTimeMillis()
     val experiment = tpcds.runExperiment(
-      queries, 
+      queriesSubset, 
       iterations = iterations,
       resultLocation = resultLocation,
       forkThread = true)
@@ -70,6 +71,8 @@ object TpcdsRun {
     experiment.waitForFinish(timeout)
     val queryEndTime = System.currentTimeMillis()
     val queryTimeSeconds = (queryEndTime - queryStartTime) / 1000
+    println("\n\n USED A SUBSET OF QUERIES: ")
+    queriesSubset.foreach(print)
     return queryTimeSeconds
     //experiment.getCurrentResults // or: spark.read.json(resultLocation).filter("timestamp = 1429132621024")
       //.withColumn("Name", substring(col("name"), 2, 100))

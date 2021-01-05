@@ -10,8 +10,8 @@ import com.databricks.spark.sql.perf.tpcds.TPCDS
 
 import jcuda.runtime.JCuda
 
-object Gpu_TpcdsRun {
-  def execute(): Long = {
+class Gpu_TpcdsRun extends Runnable {
+  override def execute(firstQuery: Int = 1, lastQuery: Int = 104): Long = {
     /* Run Parameters */
     val cores: Int = Runtime.getRuntime.availableProcessors.toInt //number of CPU-cores
     println("\nNUMBER OF CORES SET TO " + cores)
@@ -25,7 +25,7 @@ object Gpu_TpcdsRun {
 
     /* Setup Spark Context and Config */
     val conf = new SparkConf()
-      .setAppName("Gpu_TpcdsRun")
+      .setAppName(s"Gpu_TpcdsRun_q${firstQuery}-${lastQuery}_sf$scaleFactor")
       .setMaster(s"local[$cores]")
       .set("spark.driver.memory", "16g")
       .set("spark.executor.memory", "16g")
@@ -71,13 +71,16 @@ object Gpu_TpcdsRun {
     /* Run benchmarking queries */
     val tpcds = new TPCDS(sqlContext = sqlContext)
     val queries = tpcds.tpcds2_4Queries
+    val queriesSubset = queries.slice(firstQuery-1, lastQuery)
+    println("USING SUBSET OF QUERIES: ")
+    queriesSubset.foreach(print)
     spark.sql(s"use $databaseName")
 
     println("\n*\n*\nDATABASE INITIALIZED, STARTING QUERIES\n*\n*\n")
     val queryStartTime = System.currentTimeMillis()
     JCuda.cudaProfilerStart()
     val experiment = tpcds.runExperiment(
-      queries, 
+      queriesSubset, 
       iterations = iterations,
       resultLocation = resultLocation,
       forkThread = true)
@@ -87,6 +90,8 @@ object Gpu_TpcdsRun {
 
     val queryEndTime = System.currentTimeMillis()
     val queryTimeSeconds = (queryEndTime - queryStartTime) / 1000
+    println("\n\n USED A SUBSET OF QUERIES: ")
+    queriesSubset.foreach(print)
     return queryTimeSeconds
 
     //experiment.getCurrentResults // or: spark.read.json(resultLocation).filter("timestamp = 1429132621024")
