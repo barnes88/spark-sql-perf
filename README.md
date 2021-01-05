@@ -2,9 +2,8 @@
 
 This is a performance testing framework for [Spark SQL](https://spark.apache.org/sql/) in [Apache Spark](https://spark.apache.org/) 2.2+.
 
-**Note: This README is still under development. Please also check our source code for more information.**
 
-# TPCH / TPCDS Benchmark QuickStart
+# TPCH / TPCDS Benchmark Quick Start
 Run the following commands to prepare the benchmark inputs :
 ```
 git clone https://github.com/barnes88/tpcds-kit.git
@@ -22,36 +21,6 @@ GPU Profiling settings:
 ```
 nvprof --profile-from-start off --profile-child-processes
 ```
-# Quick Start
-
-## Running from command line.
-
-```
-$ bin/run --help
-
-spark-sql-perf 0.2.0
-Usage: spark-sql-perf [options]
-
-  -b <value> | --benchmark <value>
-        the name of the benchmark to run
-  -m <value> | --master <value
-        the master url to use
-  -f <value> | --filter <value>
-        a filter on the name of the queries to run
-  -i <value> | --iterations <value>
-        the number of iterations to run
-  --help
-        prints this usage text
-        
-$ bin/run --benchmark DatasetPerformance
-```
-
-The first run of `bin/run` will build the library.
-
-## Build
-
-Use `sbt package` or `sbt assembly` to build the library jar.  
-Use `sbt +package` to build for scala 2.11 and 2.12.
 
 
 ## Local performance tests
@@ -63,11 +32,6 @@ These benchmarks can be launched with the command `bin/run --benchmark JoinPerfo
 * [AggregationPerformance](https://github.com/databricks/spark-sql-perf/blob/master/src/main/scala/com/databricks/spark/sql/perf/AggregationPerformance.scala) compares the performance of aggregating different table sizes using different aggregation types.
 These benchmarks can be launched with the command `bin/run --benchmark AggregationPerformance`
 
-
-# MLlib tests
-
-To run MLlib tests, run `/bin/run-ml yamlfile`, where `yamlfile` is the path to a YAML configuration
-file describing tests to run and their parameters.
 
 # TPC-DS
 

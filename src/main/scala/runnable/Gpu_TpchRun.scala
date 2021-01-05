@@ -74,7 +74,7 @@ object Gpu_TpchRun {
     // COMMAND ----------
     /* Setup Spark Context and Config */
         val conf = new SparkConf()
-          .setAppName(s"Gpu_TphchRun_sf${scaleFactors.head}")
+          .setAppName(s"Gpu_TphchRun_q${firstQuery}-${lastQuery}_sf${scaleFactors.head}")
           .setMaster(s"local[$cores]")
           .set("spark.driver.memory", "16g")
           .set("spark.executor.memory", "16g")
