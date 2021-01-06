@@ -96,7 +96,7 @@ class Gpu_TpchRun extends Runnable {
           .set("spark.sql.files.maxPartitionBytes", "512m")
           .set("spark.sql.shuffle.partitions", "10")
           .set("spark.plugins", "com.nvidia.spark.SQLPlugin")
-
+          .set("spark.rapids.memory.gpu.allocFraction", "0.5")
         val spark = SparkSession.builder.config(conf).getOrCreate()
         val sqlContext = spark.sqlContext
         val sc = spark.sparkContext
