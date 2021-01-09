@@ -2,6 +2,7 @@ package runnable
 
 import java.nio.file.Path
 import java.nio.file.Paths
+import java.io.File
 
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.SparkConf
@@ -14,6 +15,10 @@ class TpcdsRun extends Runnable {
     val cores: Int = Runtime.getRuntime.availableProcessors.toInt //number of CPU-cores
     println("\nNUMBER OF CORES SET TO " + cores)
     val rootDir = Paths.get("TPCDS").toAbsolutePath().toString()
+    val logsDir = new File(Paths.get("SPARK_LOGS").toAbsolutePath.toString)
+    if (!logsDir.exists())
+      logsDir.mkdirs()
+
     val resultLocation = s"$rootDir/results"
     val databaseName = "tpcds"
     val scaleFactor = "1" // Size of dataset to generate in GB
@@ -28,6 +33,9 @@ class TpcdsRun extends Runnable {
       .set("spark.driver.memory", "16g")
       .set("spark.executor.memory", "16g")
       .set("spark.eventLog.enabled", "true")
+      .set("spark.eventLog.dir", s"$logsDir")
+      .set("spark.local.dir", s"$rootDir/SPARK_LOCAL")
+
     val spark = SparkSession.builder.config(conf).getOrCreate()
     val sqlContext = spark.sqlContext
 

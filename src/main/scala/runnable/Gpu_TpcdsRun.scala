@@ -2,6 +2,7 @@ package runnable
 
 import java.nio.file.Path
 import java.nio.file.Paths
+import java.io.File
 
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.SparkConf
@@ -16,6 +17,9 @@ class Gpu_TpcdsRun extends Runnable {
     val cores: Int = Runtime.getRuntime.availableProcessors.toInt //number of CPU-cores
     println("\nNUMBER OF CORES SET TO " + cores)
     val rootDir = Paths.get("TPCDS").toAbsolutePath().toString()
+    val logsDir = new File(Paths.get("SPARK_LOGS").toAbsolutePath.toString)
+    if (!logsDir.exists())
+      logsDir.mkdirs()
     val resultLocation = s"$rootDir/gpuResults" 
     val databaseName = "tpcds"
     val scaleFactor = "1" // Size of dataset to generate in GB
@@ -30,6 +34,9 @@ class Gpu_TpcdsRun extends Runnable {
       .set("spark.driver.memory", "16g")
       .set("spark.executor.memory", "16g")
       .set("spark.eventLog.enabled", "true")
+      .set("spark.eventLog.dir", s"$logsDir")
+      .set("spark.local.dir", s"$rootDir/SPARK_LOCAL")
+
       // Adding RAPIDS GPU confs
       .set("spark.sql.rapids.sql.enabled", "true")
       //.set("spark.rapids.sql.incompatibleOps.enabled", "true")

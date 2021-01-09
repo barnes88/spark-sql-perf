@@ -24,6 +24,8 @@ performance/
 TPCH/
 TPCDS/
 tpcds-kit/
+SPARK_LOGS/
+specs/
 
 # Results
 *.csv

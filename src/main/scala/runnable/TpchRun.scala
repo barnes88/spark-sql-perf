@@ -8,6 +8,7 @@ class TpchRun extends Runnable {
 
     import java.nio.file.Path
     import java.nio.file.Paths
+    import java.io.File
 
     import org.apache.spark.sql.SparkSession
     import org.apache.spark.SparkConf
@@ -37,6 +38,9 @@ class TpchRun extends Runnable {
     val rootDir = Paths.get("TPCH").toAbsolutePath().toString()
     val baseLocation = rootDir // S3 bucket, blob, or local root path
     val baseDatagenFolder = s"$rootDir/tpch_datagen"  // usually /tmp if enough space is available for datagen files
+    val logsDir = new File(Paths.get("SPARK_LOGS").toAbsolutePath.toString)
+    if (!logsDir.exists())
+      logsDir.mkdirs()
 
     // Output file formats
     val fileFormat = "parquet" // only parquet was tested
@@ -81,7 +85,7 @@ class TpchRun extends Runnable {
           .set("spark.sql.files.maxRecordsPerFile", "20000000")
           .set("parquet.memory.pool.ratio", "0.5")
           .set("spark.eventLog.enabled", "true")
-          .set("spark.eventLog.dir", Paths.get("SPARK_LOGS").toAbsolutePath.toString)
+          .set("spark.eventLog.dir", s"$logsDir")
           .set("spark.local.dir", s"$rootDir/SPARK_LOCAL")
     val spark = SparkSession.builder.config(conf).getOrCreate()
     val sqlContext = spark.sqlContext
