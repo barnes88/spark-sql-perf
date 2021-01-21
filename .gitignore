@@ -32,5 +32,6 @@ specs/
 *.csv#
 *.html
 *.txt
+*.qdrep
 Run_Gpu_Tpcds
 Run_Gpu_Tpch

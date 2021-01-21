@@ -41,9 +41,11 @@ libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % "test"
 
 libraryDependencies += "org.yaml" % "snakeyaml" % "1.23"
 
-libraryDependencies += "com.nvidia" %% "rapids-4-spark" % "0.2.0"
+//libraryDependencies += "com.nvidia" %% "rapids-4-spark" % "0.2.0"
+libraryDependencies += "com.nvidia" %% "rapids-4-spark" % "0.3.0"
 
-libraryDependencies += "ai.rapids" % "cudf" % "0.15"
+//libraryDependencies += "ai.rapids" % "cudf" % "0.15"
+libraryDependencies += "ai.rapids" % "cudf" % "0.17"
 
 libraryDependencies += "org.jcuda" % "jcuda" % "10.1.0"
 

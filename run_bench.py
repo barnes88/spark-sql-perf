@@ -14,7 +14,8 @@ for query in queries:
     filename = path + str(query) + ".txt"
     f = open(filename, "w")
     try:
-        output = run(["nvprof --profile-child-processes --events elapsed_cycles_sm --metrics ipc --csv --log-file Gpu_Tpch_q"+str(query)+"_%p.csv --profile-from-start off ./java_launch.sh Gpu_Tpch "+ str(query)+" "+str(query)], stdout=f, shell=True, timeout=24*60*60)
+        output = run(["nsys profile -c cudaProfilerApi -o " + str(query) +" ./java_launch.sh Gpu_Tpch "+ str(query)+" "+str(query)], stdout=f, shell=True, timeout=24*60*60)
+        #output = run(["nvprof --profile-child-processes --events elapsed_cycles_sm --metrics ipc --csv --log-file Gpu_Tpch_q"+str(query)+"_%p.csv --profile-from-start off ./java_launch.sh Gpu_Tpch "+ str(query)+" "+str(query)], stdout=f, shell=True, timeout=24*60*60)
     except:
         print("QUERY " + str(query) +" failed")
     finally:
