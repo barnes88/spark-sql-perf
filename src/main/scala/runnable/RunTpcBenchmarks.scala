@@ -12,6 +12,7 @@ object RunTpcBenchmarks {
     var subQuery: Boolean = false
     var firstQuery: Int = 0
     var lastQuery: Int = 0
+    var isGpu: Boolean = false
     if ( args.length == 3) {
       println("Running a subset of Queries: " + args(1) + " to " + args(2))
       subQuery = true
@@ -26,13 +27,15 @@ object RunTpcBenchmarks {
         new TpchRun
       case "Gpu_Tpch" =>
         println("Running Gpu_Tpch Benchmark")
-        new Gpu_TpchRun
+        isGpu = true
+        new TpchRun
       case "Tpcds" =>
         println("Running Tpcds Benchmark")
         new TpcdsRun
       case "Gpu_Tpcds" =>
         println("Running Gpu_Tpcds Benchmark")
-        new Gpu_TpcdsRun
+        isGpu = true
+        new TpcdsRun
       case _ =>
         println("Error, benchmark name not recognized")
         println("Valid options include one of: [Tpch, Gpu_Tpch, Tpcds, GpuTpcds]")
@@ -41,9 +44,9 @@ object RunTpcBenchmarks {
 
     val queryTimeSeconds = 
       if (subQuery)
-        benchmark.execute(firstQuery, lastQuery)
+        benchmark.execute(firstQuery, lastQuery, isGpu)
       else
-        benchmark.execute()
+        benchmark.execute(isGpu = isGpu)
 
     val endTime = System.currentTimeMillis()
     val wallTimeSeconds = (endTime - startTime)/1000

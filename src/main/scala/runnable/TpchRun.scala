@@ -1,10 +1,12 @@
 package runnable
 
 class TpchRun extends Runnable {
-  override def execute(firstQuery: Int = 1, lastQuery: Int = 22): Long = {
+  override def execute(firstQuery: Int = 1, lastQuery: Int = 22, isGpu: Boolean = false): Long = {
     // Multi TPC- H and DS generator and database importer using spark-sql-perf, typically to generate parquet files in S3/blobstore objects
 
     // Imports, fail fast if we are missing any library
+
+    import jcuda.runtime.JCuda
 
     import java.nio.file.Path
     import java.nio.file.Paths
@@ -33,7 +35,7 @@ class TpchRun extends Runnable {
 
 
     val benchmarks = Seq("TPCH") // Options: TCPDS", "TPCH"
-    val scaleFactors = Seq("1") // "1", "10", "100", "1000", "10000" list of scale factors to generate and import
+    val scaleFactors = Seq(scaleFactor) // "1", "10", "100", "1000", "10000" list of scale factors to generate and import
 
     val rootDir = Paths.get("TPCH").toAbsolutePath().toString()
     val baseLocation = rootDir // S3 bucket, blob, or local root path
@@ -41,7 +43,6 @@ class TpchRun extends Runnable {
     val logsDir = new File(Paths.get("SPARK_LOGS").toAbsolutePath.toString)
     if (!logsDir.exists())
       logsDir.mkdirs()
-
     // Output file formats
     val fileFormat = "parquet" // only parquet was tested
     val shuffle = true // If true, partitions will be coalesced into a single file during generation up to spark.sql.files.maxRecordsPerFile (if set)
@@ -52,7 +53,6 @@ class TpchRun extends Runnable {
     val createColumnStats = true
 
     val workers: Int = 1 
-    val cores: Int = Runtime.getRuntime.availableProcessors.toInt //number of CPU-cores
     println("\nNUMBER OF CORES SET TO " + cores)
 
     val dbSuffix = "" // set only if creating multiple DBs or source file folders with different settings, use a leading _
@@ -63,7 +63,6 @@ class TpchRun extends Runnable {
       s"$rootDir/tpch/tpch_sf${scaleFactor}_${format}"
 
     val resultLocation = s"$rootDir/results"
-    val iterations = 1 
     def databaseName(scaleFactor: Int, format: String) = s"tpch_sf${scaleFactor}_${format}"
     val randomizeQueries = false //to use on concurrency tests
 
@@ -75,18 +74,18 @@ class TpchRun extends Runnable {
     
     // COMMAND ----------
     /* Setup Spark Context and Config */
-    val conf = new SparkConf()
-          .setAppName(s"TphchRun_q${firstQuery}-${lastQuery}_sf${scaleFactors.head}")
-          .setMaster(s"local[$cores]")
-          .set("spark.driver.memory", "16g")
-          .set("spark.executor.memory", "16g")
-          .set("spark.eventLog.enabled", "true")
-          .set("spark.sql.parquet.compression.codec", "snappy")
-          .set("spark.sql.files.maxRecordsPerFile", "20000000")
-          .set("parquet.memory.pool.ratio", "0.5")
-          .set("spark.eventLog.enabled", "true")
-          .set("spark.eventLog.dir", s"$logsDir")
-          .set("spark.local.dir", s"$rootDir/SPARK_LOCAL")
+    val appName = 
+      if(isGpu)
+        s"Gpu_Tpch_q${firstQuery}-${lastQuery}_sf${scaleFactor}"
+       else
+        s"Tpch_q${firstQuery}-${lastQuery}_sf${scaleFactor}"
+        
+    val conf = super.createSparkConf(
+      isGpu = isGpu,
+      appName = appName.toString,
+      logsDir = logsDir.toString,
+      rootDir = rootDir.toString,
+      cores = cores.toString)
     val spark = SparkSession.builder.config(conf).getOrCreate()
     val sqlContext = spark.sqlContext
     val sc = spark.sparkContext
@@ -338,44 +337,43 @@ class TpchRun extends Runnable {
       new Query(s"Q$q", spark.sqlContext.sql(queryContent), description = s"TPCH Query $q",
         executionMode = CollectResults)
     }
-  
-  
+
     val tpch = new TPCH(sqlContext = spark.sqlContext, queryRange = queryRange)
 
     var queryStartTime : Long = 0
     var queryEndTime : Long = 0
 
-
     scaleFactors.map(_.toInt).foreach{ scaleFactor =>
-      println("DB SF " + databaseName(scaleFactor, fileFormat))
-      spark.sql(s"USE ${databaseName(scaleFactor, fileFormat)}")
-      val experiment = tpch.runExperiment(
-       queries,
-       iterations = iterations,
-       resultLocation = resultLocation,
-       tags = Map(
-       "runtype" -> runtype,
-       "date" -> java.time.LocalDate.now.toString,
-       "database" -> databaseName(scaleFactor, fileFormat),
-       "scale_factor" -> scaleFactor.toString,
-       "spark_version" -> spark.version,
-       "system" -> "Spark",
-       "workers" -> workers.toString,
-       "workerInstanceType" -> workerInstanceType,
-       "configuration" -> configuration
-       )
-      )
-      println(s"Running SF $scaleFactor")
-      queryStartTime = System.currentTimeMillis()
-      experiment.waitForFinish(36 * 60 * 60) //36hours
-      queryEndTime = System.currentTimeMillis()
-      println("TPCH Benchmark Complete")
-      // val summary = experiment.getCurrentResults
-      // .withColumn("Name", substring(col("name"), 2, 100))
-      // .withColumn("Runtime", (col("parsingTime") + col("analysisTime") + col("optimizationTime") + col("planningTime") + col("executionTime")) / 1000.0)
-      // .select('Name, 'Runtime)
-      // summary.show(9999, false)
+        println("DB SF " + databaseName(scaleFactor, fileFormat))
+        spark.sql(s"USE ${databaseName(scaleFactor, fileFormat)}")
+        val experiment = tpch.runExperiment(
+         queries,
+         iterations = iterations,
+         resultLocation = resultLocation,
+         tags = Map(
+         "runtype" -> runtype,
+         "date" -> java.time.LocalDate.now.toString,
+         "database" -> databaseName(scaleFactor, fileFormat),
+         "scale_factor" -> scaleFactor.toString,
+         "spark_version" -> spark.version,
+         "system" -> "Spark",
+         "workers" -> workers.toString,
+         "workerInstanceType" -> workerInstanceType,
+         "configuration" -> configuration
+         )
+        )
+        println(s"Running SF $scaleFactor")
+        
+        if (isGpu)
+          JCuda.cudaProfilerStart()
+        queryStartTime = System.currentTimeMillis()
+        experiment.waitForFinish(36 * 60 * 60) //36hours
+        queryEndTime = System.currentTimeMillis()
+        if (isGpu)
+          JCuda.cudaProfilerStop()
+        println(s"$appName Benchmark Complete")
     }
+
     val queryTimeSeconds = (queryEndTime - queryStartTime) / 1000
     return queryTimeSeconds
   }
