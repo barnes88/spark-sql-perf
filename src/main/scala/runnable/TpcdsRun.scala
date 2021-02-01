@@ -29,7 +29,7 @@ class TpcdsRun extends Runnable {
        else
         s"Tpcds_q${firstQuery}-${lastQuery}_sf${scaleFactor}"
         
-    val conf = super.createSparkConf(
+    super.initSparkConf(
       isGpu = isGpu,
       appName = appName.toString,
       logsDir = logsDir.toString,

@@ -80,7 +80,7 @@ class TpchRun extends Runnable {
        else
         s"Tpch_q${firstQuery}-${lastQuery}_sf${scaleFactor}"
         
-    val conf = super.createSparkConf(
+    super.initSparkConf(
       isGpu = isGpu,
       appName = appName.toString,
       logsDir = logsDir.toString,

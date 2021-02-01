@@ -1,5 +1,9 @@
 package runnable
 
+import java.io.{File, BufferedWriter, FileWriter}
+import java.time.format.DateTimeFormatter
+import java.time.LocalDateTime
+
 object RunTpcBenchmarks {
   def main (args: Array[String]) {
     if (args.length < 1) {
@@ -8,6 +12,7 @@ object RunTpcBenchmarks {
       return
     }
 
+    val logToFile: Boolean = true
     val benchmarkName: String = args(0)
     var subQuery: Boolean = false
     var firstQuery: Int = 0
@@ -58,5 +63,23 @@ object RunTpcBenchmarks {
       println("Queries run: " + args(1) + " to " + args(2))
     else
       println("All Queries run")
+
+    if (logToFile) {
+      val timeString = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH:mm").format(LocalDateTime.now)
+      val fileName = s"${timeString}_${benchmarkName}-q$firstQuery-$lastQuery.txt"
+      val logFile = new File(fileName)
+      val bw = new BufferedWriter(new FileWriter(logFile))
+      bw.write("Benchmark " + benchmarkName + " complete!\n\n")
+      bw.write("Wallclock time elapsed: " + wallTimeSeconds/60 + " minutes " + wallTimeSeconds %60 + " seconds\n")
+      bw.write("Time Spent executing Bencmark queries: " + queryTimeSeconds/60 + " minutes " + queryTimeSeconds%60 + " seconds\n")
+      if (subQuery)
+        bw.write("Queries run: " + args(1) + " to " + args(2))
+      else
+        bw.write("All Queries run")
+      bw.write("\n\nSpark Conf used was:\n")
+      bw.write(benchmark.printSparkConf)
+      bw.close()
+      println("LOGFILE WRITTEN: " + fileName)
+    }
   }
 }

@@ -10,13 +10,15 @@ abstract class Runnable() {
   val iterations: Int = 1 // how many iterations of queries to run
   val timeout: Int = 24*60*60 // timeout in seconds
 
+  // Spark Configuration object
+  var conf: SparkConf = _
+
   // Default Arguments for execute must be overridden by child classes
   def execute(firstQuery: Int = 0, lastQuery: Int = 0, isGpu: Boolean = false): Long 
   
-  def createSparkConf(isGpu: Boolean, appName: String, logsDir: String,
-    rootDir: String, cores: String): SparkConf = {
-    println ("isGpu = "+ isGpu.toString)
-    val conf = new SparkConf()
+  def initSparkConf(isGpu: Boolean, appName: String, logsDir: String,
+    rootDir: String, cores: String) {
+    conf = new SparkConf()
     // Default Spark Configs for all Tpc Benchmarks
         .setAppName(appName)
         .setMaster(s"local[$cores]")
@@ -41,10 +43,14 @@ abstract class Runnable() {
         .set("spark.rapids.memory.pinnedPool.size", "2G")
         .set("spark.locality.wait", "0s")
         .set("spark.sql.files.maxPartitionBytes", "512m")
-        .set("spark.sql.shuffle.partitions", "10")
+        //.set("spark.sql.shuffle.partitions", "10")
         .set("spark.plugins", "com.nvidia.spark.SQLPlugin")
         .set("spark.rapids.memory.gpu.allocFraction", "0.5")
+        .set("spark.rapids.sql.format.parquet.multiThreadedRead.maxNumFilesParallel", "2147483647") //default
+        .set("spark.rapids.sql.format.parquet.multiThreadedRead.numThreads", "20") //default
+        .set("spark.rapids.sql.format.parquet.reader.type", "MULTITHREADED") // default, alternatives: "COALESCING" or "PERFILE"
     }
-    return conf
   }
+
+  def printSparkConf(): String = conf.toDebugString
 }
