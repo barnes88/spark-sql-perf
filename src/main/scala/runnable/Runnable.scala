@@ -22,10 +22,10 @@ abstract class Runnable() {
     // Default Spark Configs for all Tpc Benchmarks
         .setAppName(appName)
         .setMaster(s"local[$cores]")
-        .set("spark.driver.memory", "16g")
-        .set("spark.executor.memory", "16g")
+        .set("spark.driver.memory", "32g")
+        .set("spark.executor.memory", "32g")
         .set("spark.eventLog.enabled", "true")
-        .set("spark.sql.parquet.compression.codec", "snappy")
+        .set("spark.sql.parquet.compression.codec", "none") // default is "snappy"
         .set("spark.sql.files.maxRecordsPerFile", "20000000")
         .set("parquet.memory.pool.ratio", "0.5")
         .set("spark.eventLog.enabled", "true")
@@ -38,14 +38,14 @@ abstract class Runnable() {
         .set("spark.sql.rapids.sql.enabled", "true")
         .set("spark.rapids.sql.incompatibleOps.enabled", "true")
         .set("spark.executor.instances", "1") // changed to 1 executor
-        .set("spark.executor.cores", "1")
-        .set("spark.rapids.sql.concurrentGpuTasks", "1")
-        .set("spark.rapids.memory.pinnedPool.size", "2G")
+        .set("spark.executor.cores", "20")
+        .set("spark.rapids.sql.concurrentGpuTasks", "2")
+        .set("spark.sql.shuffle.partitions", "2")
+        .set("spark.rapids.memory.pinnedPool.size", "8G")
         .set("spark.locality.wait", "0s")
-        .set("spark.sql.files.maxPartitionBytes", "512m")
-        //.set("spark.sql.shuffle.partitions", "10")
+        .set("spark.sql.files.maxPartitionBytes", "671088640")
         .set("spark.plugins", "com.nvidia.spark.SQLPlugin")
-        .set("spark.rapids.memory.gpu.allocFraction", "0.5")
+        .set("spark.rapids.memory.gpu.allocFraction", "0.8")
         .set("spark.rapids.sql.format.parquet.multiThreadedRead.maxNumFilesParallel", "2147483647") //default
         .set("spark.rapids.sql.format.parquet.multiThreadedRead.numThreads", "20") //default
         .set("spark.rapids.sql.format.parquet.reader.type", "MULTITHREADED") // default, alternatives: "COALESCING" or "PERFILE"
